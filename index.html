@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Desometer – Desi</title>
+  <style>
+    body {
+      font-family: 'Comic Sans MS', cursive;
+      background: linear-gradient(to right, #ffecd2, #fcb69f);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+      margin: 0;
+    }
+    .container {
+      background: white;
+      border-radius: 20px;
+      padding: 2rem;
+      box-shadow: 0 0 20px rgba(0,0,0,0.2);
+      text-align: center;
+      width: 90%;
+      max-width: 400px;
+    }
+    .emoji {
+      font-size: 3rem;
+      margin-top: 1rem;
+    }
+    .thermometer {
+      width: 50px;
+      height: 200px;
+      background: lightgray;
+      border-radius: 25px;
+      margin: 1rem auto;
+      position: relative;
+    }
+    .level {
+      position: absolute;
+      bottom: 0;
+      width: 100%;
+      border-radius: 25px;
+    }
+    input[type="range"] {
+      width: 100%;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Desometer – Desi</h1>
+    <p>Wie fühlst du dich gerade?</p>
+    <input type="range" min="0" max="3" value="1" id="moodSlider">
+    <div class="emoji" id="moodEmoji">😐</div>
+    <div class="thermometer">
+      <div class="level" id="thermoLevel" style="height: 50%; background-color: gold;"></div>
+    </div>
+  </div>
+
+  <!-- Firebase -->
+  <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-database-compat.js"></script>
+  <script>
+    const firebaseConfig = {
+      apiKey: "AIzaSyATmv0Pe5sIvu6PtWhV1bdfVHi0MhO2OW0",
+      authDomain: "desometer1.firebaseapp.com",
+      databaseURL: "https://desometer1-default-rtdb.europe-west1.firebasedatabase.app",
+      projectId: "desometer1",
+      storageBucket: "desometer1.appspot.com",
+      messagingSenderId: "619102462725",
+      appId: "1:619102462725:web:e800986c68440f8bda8d6c",
+      measurementId: "G-Z6LP8QJH00"
+    };
+
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.database();
+
+    const moods = [
+      { emoji: "😠", color: "red", height: "25%" },
+      { emoji: "😐", color: "gold", height: "50%" },
+      { emoji: "😢", color: "lightblue", height: "75%" },
+      { emoji: "🥳", color: "lightgreen", height: "100%" }
+    ];
+
+    const moodSlider = document.getElementById('moodSlider');
+    const moodEmoji = document.getElementById('moodEmoji');
+    const thermoLevel = document.getElementById('thermoLevel');
+
+    function updateMood(value) {
+      const mood = moods[value];
+      moodEmoji.textContent = mood.emoji;
+      thermoLevel.style.backgroundColor = mood.color;
+      thermoLevel.style.height = mood.height;
+    }
+
+    moodSlider.addEventListener('input', () => {
+      const value = moodSlider.value;
+      updateMood(value);
+      db.ref('mood').set({ value: parseInt(value) });
+    });
+
+    // Anfangsstatus setzen
+    db.ref('mood/value').get().then(snapshot => {
+      if (snapshot.exists()) {
+        const value = snapshot.val();
+        moodSlider.value = value;
+        updateMood(value);
+      }
+    });
+  </script>
+</body>
+</html> 
